@@ -13,9 +13,10 @@ docker compose up -d     # 로컬 PostgreSQL (DB/계정/비밀번호 모두 dowa
 ./gradlew test           # 테스트
 ```
 
+- **API 규약·명세·프론트 연동 가이드: [docs/](docs/README.md)**
 - API 문서(Swagger): http://localhost:8080/swagger-ui/index.html
 - 상태 확인: http://localhost:8080/actuator/health
-- 처음 실행하면 Flyway가 표를 만들고 월계동 내과 3곳을 임시로 넣습니다(`db/migration`).
+- 처음 실행하면 Flyway가 표를 만들고 월계동 내과 3곳, 증상 칩, 시연용 가상 병원 3곳을 넣습니다(`db/migration`).
 
 다른 DB(예: Supabase)를 쓰려면 환경변수로 바꿉니다. 목록은 `.env.example`에 있습니다. **비밀번호·API 키는 커밋하지 말고** Render 환경변수에 넣으세요.
 
@@ -29,24 +30,28 @@ docker compose up -d     # 로컬 PostgreSQL (DB/계정/비밀번호 모두 dowa
 
 ```
 src/main/kotlin/kr/dowadream/
+├ common/     공통 오류 응답(ErrorResponse, GlobalExceptionHandler)
 ├ hospital/   병원 목록·상세 API
+├ symptom/    증상 칩 → 진료과 안내 API
 ├ waiting/    WaitingCalculator(대기시간 계산, 순수 함수), WaitingStatus(병원별 현재 대기)
 ├ device/     장치 보고 수신 API
 └ config/     CORS
 src/main/resources/
 ├ application.yml
-└ db/migration/   V1__init.sql(표), V2__seed_wolgye_sample.sql(임시 병원 3곳)
+└ db/migration/   V1 표, V2 월계동 임시 병원, V3 증상 칩, V4 시연용 가상 병원
+docs/              API 공통 규약, API 명세, 프론트 연동 가이드
 ```
 
 ## API
 
 | API | 설명 |
 |---|---|
-| `GET /api/hospitals?dept=01&lat=&lng=` | 진료과로 거르고, 위치를 주면 가까운 순. 대기 정보 포함 |
+| `GET /api/hospitals?dept=&q=&ids=&lat=&lng=` | 진료과·이름·id로 거르고, 위치를 주면 가까운 순. 대기 정보 포함 |
 | `GET /api/hospitals/{id}` | 병원 하나 |
+| `GET /api/symptoms` | 증상 칩과 진료과 안내 |
 | `POST /api/devices/{deviceId}/reports` | 장치 1분 집계 (헤더 `X-Device-Key`) |
 
-`waiting`이 `null`이면 "정보 없음"입니다.
+`waiting`이 `null`이면 "정보 없음"입니다. 자세한 요청·응답과 예정 API는 [docs/api-spec.md](docs/api-spec.md).
 
 ## 대기시간 계산 (`WaitingCalculator`)
 

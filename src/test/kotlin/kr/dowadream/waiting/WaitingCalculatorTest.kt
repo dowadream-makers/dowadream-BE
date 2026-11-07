@@ -14,6 +14,7 @@ class WaitingCalculatorTest {
         val info = WaitingCalculator.calculate(4, minutesAgo(30), 9, minutesAgo(1), 5.0, 1, now)!!
         assertEquals(4, info.people)
         assertEquals(WaitingSource.ADMIN, info.source)
+        assertEquals(minutesAgo(30), info.updatedAt)
     }
 
     @Test

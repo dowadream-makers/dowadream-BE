@@ -22,12 +22,21 @@ class HospitalService(
     private val hospitalRepository: HospitalRepository,
     private val waitingStatusRepository: WaitingStatusRepository,
 ) {
-    /** 진료과로 거르고, 위치가 있으면 가까운 순(좌표 없는 병원은 뒤로), 없으면 이름순 */
-    fun list(deptCode: String?, lat: Double?, lng: Double?): List<HospitalResponse> {
-        val hospitals = if (deptCode.isNullOrBlank()) hospitalRepository.findAll() else hospitalRepository.findByDeptCode(deptCode)
-        val statuses = waitingStatusRepository.findAllById(hospitals.mapNotNull { it.id }).associateBy { it.hospitalId }
+    /**
+     * 진료과(deptCode)·이름(q)·id 목록(ids)으로 거른다. 조건은 함께 쓸 수 있다.
+     * 위치가 있으면 가까운 순(좌표 없는 병원은 뒤로), 없으면 이름순.
+     */
+    fun list(deptCode: String?, q: String?, ids: List<Long>?, lat: Double?, lng: Double?): List<HospitalResponse> {
+        var hospitals = if (deptCode.isNullOrBlank()) hospitalRepository.findAll() else hospitalRepository.findByDeptCode(deptCode)
+        if (!q.isNullOrBlank()) hospitals = hospitals.filter { it.name.contains(q.trim()) }
+        if (ids != null) hospitals = hospitals.filter { it.id in ids }
+        val hospitalIds = hospitals.mapNotNull { it.id }
+        if (hospitalIds.isEmpty()) return emptyList()
+
+        val statuses = waitingStatusRepository.findAllById(hospitalIds).associateBy { it.hospitalId }
+        val departments = hospitalRepository.findDepartments(hospitalIds).groupBy { it.hospitalId }
         val now = Instant.now()
-        val result = hospitals.map { toResponse(it, statuses[it.id], lat, lng, now) }
+        val result = hospitals.map { toResponse(it, departments[it.id].orEmpty(), deptCode, statuses[it.id], lat, lng, now) }
         return if (lat != null && lng != null) {
             result.sortedWith(compareBy(nullsLast()) { it.distanceM })
         } else {
@@ -37,12 +46,23 @@ class HospitalService(
 
     fun get(id: Long, lat: Double?, lng: Double?): HospitalResponse {
         val hospital = hospitalRepository.findByIdOrNull(id) ?: throw ResponseStatusException(HttpStatus.NOT_FOUND)
-        return toResponse(hospital, waitingStatusRepository.findByIdOrNull(id), lat, lng, Instant.now())
+        val departments = hospitalRepository.findDepartments(listOf(id))
+        return toResponse(hospital, departments, null, waitingStatusRepository.findByIdOrNull(id), lat, lng, Instant.now())
     }
 
-    private fun toResponse(h: Hospital, status: WaitingStatus?, lat: Double?, lng: Double?, now: Instant) = HospitalResponse(
+    private fun toResponse(
+        h: Hospital,
+        departments: List<DepartmentRow>,
+        deptCode: String?,
+        status: WaitingStatus?,
+        lat: Double?,
+        lng: Double?,
+        now: Instant,
+    ) = HospitalResponse(
         id = h.id!!,
         name = h.name,
+        deptName = (departments.find { it.deptCode == deptCode } ?: departments.firstOrNull())?.deptName ?: h.typeName,
+        departments = departments.map { it.deptName },
         typeName = h.typeName,
         phone = h.phone,
         address = h.address,
@@ -59,6 +79,7 @@ class HospitalService(
             doctorCount = h.doctorTotal,
             now = now,
         ),
+        demo = h.isDemo,
     )
 
     /** 두 좌표 사이 직선거리(미터, 하버사인 공식) */
