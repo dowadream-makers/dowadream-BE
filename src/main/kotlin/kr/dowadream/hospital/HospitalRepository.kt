@@ -12,4 +12,19 @@ interface HospitalRepository : JpaRepository<Hospital, Long> {
         nativeQuery = true,
     )
     fun findByDeptCode(deptCode: String): List<Hospital>
+
+    @Query(
+        value = """
+            SELECT hospital_id AS hospitalId, dept_code AS deptCode, dept_name AS deptName
+            FROM hospital_department WHERE hospital_id IN (:hospitalIds) ORDER BY dept_code
+        """,
+        nativeQuery = true,
+    )
+    fun findDepartments(hospitalIds: Collection<Long>): List<DepartmentRow>
+}
+
+interface DepartmentRow {
+    val hospitalId: Long
+    val deptCode: String
+    val deptName: String
 }

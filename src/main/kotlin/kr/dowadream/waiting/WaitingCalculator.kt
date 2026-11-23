@@ -16,6 +16,8 @@ data class WaitingInfo(
     val minutes: Int,
     val level: CrowdLevel,
     val source: WaitingSource,
+    /** 이 값을 마지막으로 확인한 시각 ("3분 전 확인") */
+    val updatedAt: Instant,
 )
 
 /**
@@ -38,12 +40,12 @@ object WaitingCalculator {
         doctorCount: Int?,
         now: Instant,
     ): WaitingInfo? {
-        val (people, source) = when {
-            isFresh(adminWaiting, adminUpdatedAt, ADMIN_FRESH, now) -> adminWaiting!! to WaitingSource.ADMIN
-            isFresh(sensorWaiting, sensorUpdatedAt, SENSOR_FRESH, now) -> sensorWaiting!! to WaitingSource.SENSOR
+        val (people, source, updatedAt) = when {
+            isFresh(adminWaiting, adminUpdatedAt, ADMIN_FRESH, now) -> Triple(adminWaiting!!, WaitingSource.ADMIN, adminUpdatedAt!!)
+            isFresh(sensorWaiting, sensorUpdatedAt, SENSOR_FRESH, now) -> Triple(sensorWaiting!!, WaitingSource.SENSOR, sensorUpdatedAt!!)
             else -> return null
         }
-        return WaitingInfo(people, estimateMinutes(people, avgConsultMin, doctorCount), levelOf(people), source)
+        return WaitingInfo(people, estimateMinutes(people, avgConsultMin, doctorCount), levelOf(people), source, updatedAt)
     }
 
     /** 센서의 최근 평균 인원 × 보정계수(보호자 동반 보정)를 반올림 */
