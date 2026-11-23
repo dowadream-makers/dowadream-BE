@@ -24,9 +24,9 @@
 
 > **구현 (2026-11-23)**: `publicdata/` 패키지와 `V5__public_data_sync.sql`. 매일 04:00 + `SYNC_ON_STARTUP=true`면 서버 시작 직후 1번.
 > - 노원구 코드는 설정에 적지 않고, 동기화 때마다 노원구청 좌표 주변 응답의 `sgguCdNm=노원구` 항목에서 읽습니다.
-> - 2026-11-23 실제 호출로 확인: 노원구 `sidoCd=110000`, `sgguCd=110022`, 전체 **766곳**. 응답 필드 `ykiho, yadmNm, clCd, clCdNm, addr, telno, XPos, YPos, drTotCnt, mdeptSdrCnt…` 확인. 연결이 자주 끊겨 재시도 3번.
+> - 2026-11-23 실제 호출로 확인: 노원구 `sidoCd=110000`, `sgguCd=110022`, 전체 **766곳**. 응답 필드 `ykiho, yadmNm, clCd, clCdNm, addr, telno, XPos, YPos, drTotCnt, mdeptSdrCnt…` 확인. 연결이 자주 끊겨 재시도 6번.
 > - 응답은 공공 API 기본값인 XML로 받습니다(`_type=json` 지원 여부와 상관없게).
-> - ②는 `getDgsbjtInfo2.8`(진료과목, `dgsbjtCd`·`dgsbjtCdNm`·`dgsbjtPrSdrCnt`=과목별 전문의 수) 1번만 부릅니다. **[확인 필요: 실제 응답 필드명]**
+> - ②는 `getDgsbjtInfo2.8`(진료과목, `dgsbjtCd`·`dgsbjtCdNm`·`dgsbjtPrSdrCnt`=과목별 전문의 수) 1번만 부릅니다. 기본 10건이라 `numOfRows=100`으로 부릅니다. ③은 노원구 755건, 쉬는 요일은 `dutyTime` 필드가 없습니다. (둘 다 2026-11-23 실제 응답으로 확인)
 > - V2 임시 병원 3곳은 전화번호가 같은 심평원 병원이 오면 그 줄을 이어 쓰고(id 유지), 못 이어 쓰면 비활성.
 > - 수동 실행 `POST /api/admin/sync`와 CSV 가져오기는 4단계(관리자 로그인)와 함께 만듭니다.
 
