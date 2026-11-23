@@ -28,4 +28,10 @@ class Hospital(
     var waitingFactor: Double = 0.8,
     var isDemo: Boolean = false,
     var syncedAt: Instant? = null,
+    /** 공공데이터 동기화에서 빠진 병원은 false (지우지 않음) */
+    var active: Boolean = true,
+    /** 앱 분류: CLINIC, HOSPITAL, PUBLIC, DENTAL, KOREAN_MED, CARE, OTHER */
+    var appType: String? = null,
+    var sgguCd: String? = null,
+    var deptSyncedAt: Instant? = null,
 )

@@ -17,6 +17,16 @@ app:
   public-data:
     # 공공데이터포털 Decoding 인증키. 비어 있으면 공공데이터 동기화를 건너뜁니다.
     key: ${PUBLIC_DATA_KEY:}
+    # 매일 04:00(서울)에 노원구 병원 동기화. 배포 직후 한 번 돌리려면 SYNC_ON_STARTUP=true
+    sync-cron: "0 0 4 * * *"
+    sync-on-startup: ${SYNC_ON_STARTUP:false}
+    region:
+      sido-name: 서울특별시
+      sggu-name: 노원구
+      # 노원구청 좌표. 이 근처 병원 응답에서 노원구 지역 코드(sidoCd, sggu-cd)를 읽습니다.
+      x: 127.0565
+      y: 37.6543
+  zone: Asia/Seoul
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 

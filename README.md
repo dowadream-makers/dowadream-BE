@@ -79,14 +79,13 @@ curl -X POST localhost:8080/api/devices/door-01/reports \
 ## Render 배포
 
 1. Render에서 New > Web Service, 이 저장소 선택, Runtime은 **Docker** (`Dockerfile` 사용)
-2. 환경변수에 `DATABASE_URL`(Supabase의 JDBC 주소, `?sslmode=require`), `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `CORS_ALLOWED_ORIGINS`(Vercel 주소)
+2. 환경변수에 `DATABASE_URL`(Supabase의 JDBC 주소, `?sslmode=require`), `DATABASE_USERNAME`, `DATABASE_PASSWORD`, `CORS_ALLOWED_ORIGINS`(Vercel 주소), `PUBLIC_DATA_KEY`(공공데이터포털 Decoding 키). 첫 배포 때 `SYNC_ON_STARTUP=true`로 한 번 돌리면 노원구 병원이 바로 채워집니다.
 3. Health Check Path: `/actuator/health`
 
 무료 플랜은 RAM 512MB라 `Dockerfile`에서 힙을 300MB로 잡아 두었습니다.
 
 ## 아직 없는 것 (계획서 순서)
 
-- 공공데이터(심평원·국립중앙의료원) 하루 1번 동기화 → 좌표·의사 수·진료시간 채우기
 - 진료시간 밖이면 "진료 시간이 아니에요"
 - 관리자 로그인과 대기 인원 입력 (`/api/admin/**`, Spring Security)
 - 시연용 레이더 점 화면 (`/frames`, `/live` SSE)

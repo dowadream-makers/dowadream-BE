@@ -27,7 +27,8 @@ class HospitalService(
      * 위치가 있으면 가까운 순(좌표 없는 병원은 뒤로), 없으면 이름순.
      */
     fun list(deptCode: String?, q: String?, ids: List<Long>?, lat: Double?, lng: Double?): List<HospitalResponse> {
-        var hospitals = if (deptCode.isNullOrBlank()) hospitalRepository.findAll() else hospitalRepository.findByDeptCode(deptCode)
+        var hospitals = (if (deptCode.isNullOrBlank()) hospitalRepository.findAll() else hospitalRepository.findByDeptCode(deptCode))
+            .filter { it.active }
         if (!q.isNullOrBlank()) hospitals = hospitals.filter { it.name.contains(q.trim()) }
         if (ids != null) hospitals = hospitals.filter { it.id in ids }
         val hospitalIds = hospitals.mapNotNull { it.id }
