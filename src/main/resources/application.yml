@@ -1,6 +1,9 @@
 spring:
   application:
     name: dowadream-be
+  config:
+    # 로컬 개발: 프로젝트 폴더의 .env 파일(커밋 안 됨)을 읽어 환경변수처럼 씁니다.
+    import: optional:file:.env[.properties]
   datasource:
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/dowadream}
     username: ${DATABASE_USERNAME:dowadream}
@@ -11,6 +14,9 @@ spring:
       ddl-auto: none   # 표는 Flyway(db/migration)가 만듭니다.
 
 app:
+  public-data:
+    # 공공데이터포털 Decoding 인증키. 비어 있으면 공공데이터 동기화를 건너뜁니다.
+    key: ${PUBLIC_DATA_KEY:}
   cors:
     allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
 
