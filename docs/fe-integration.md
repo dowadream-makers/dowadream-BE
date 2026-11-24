@@ -22,7 +22,7 @@ VITE_API_BASE_URL=http://localhost:8080
 | `src/api/types.ts` | 서버 응답 타입 (`Hospital`, `Waiting`, `Symptom`). **서버 응답을 바꾸면 여기를 같이 고침** |
 | `src/api/hospitals.ts` | `useHospitals()`, `useHospital()` |
 | `src/api/symptoms.ts` | `useSymptoms()` |
-| `src/lib/storage.ts` | 브라우저 저장(관심 병원, 글자 크기, 지역, 데모 로그인) |
+| `src/lib/storage.ts` | 브라우저 저장(관심 병원, 글자 크기, 지역, 로그인 토큰) |
 | `src/lib/location.ts` | 사용자 위치 (실패하면 노원구청 좌표) |
 
 규칙:
@@ -84,10 +84,10 @@ export interface ApiErrorBody {
 | `dowadream.favorites` | 관심 병원 id 배열 `[4, 6]` | 06 별, 07, 15 |
 | `dowadream.largeText` | `"1"` 이면 글자 크게 | 모든 화면 상단 "Aa" |
 | `dowadream.region` | `"서울 노원구"` | 01, 02, 13 |
-| `dowadream.demoLogin` | `"1"` 이면 데모 로그인 상태 | 13/15, 14 |
+| `dowadream.login` | `{ token, nickname, provider }` 소셜 로그인 상태 (토큰 30일) | 13/15, 14 |
 
 - 시안상 **관심 병원 저장은 로그인 후에만** 됩니다. 로그인 안 한 상태에서 별을 누르면 14 로그인 화면으로 보냅니다.
-- 데모 로그인은 서버 호출 없이 `dowadream.demoLogin`만 켭니다. 로그아웃하면 끄고, 관심 병원은 남겨 둡니다.
+- 로그인은 구글·카카오·네이버 소셜 로그인입니다([social-login.md](social-login.md)). 로그아웃은 `dowadream.login`만 지우고, 관심 병원은 남겨 둡니다.
 - 증상과 위치는 서버에 저장하지 않습니다. 고른 증상은 주소 쿼리(`/hospitals?dept=05&symptom=무릎이 아파요`)로만 넘깁니다.
 
 ## 5. 화면별 연동표 (시안 번호 기준)
@@ -107,7 +107,7 @@ export interface ApiErrorBody {
 | 10 길찾기 | 08 위 시트 | 08 응답 재사용 | 카카오맵 링크로 넘김(아래 7장). 걷는 시간은 거리로 계산 |
 | 11·12 119 | `/emergency` | 없음 | 12는 시연용 안내 모달 |
 | 13·15 내 정보 | `/my` | 없음 | 로그인 여부로 13/15 전환 |
-| 14 로그인 | `/login` | 없음 | 데모 로그인 = localStorage |
+| 14 로그인 | `/login`, `/login/callback` | `GET /api/auth/providers`, `GET /api/me` | 버튼 → 서버 `/api/auth/{회사}/start`, 돌아오면 `#token` 저장 |
 | 16 문서 쉽게 보기 | `/document` | 없음 | 준비 중 |
 | 17 생활 도움 요청 | `/help` | 없음 (💭 `POST /api/help-requests`) | 준비 중 |
 

@@ -12,6 +12,9 @@
 | ✅ | `GET /api/hospitals/{id}` | 병원 하나 | 08, 09, 10 |
 | ✅ | `GET /api/symptoms` | 증상 칩과 진료과 안내 | 03, 04, 06 안내 줄 |
 | ✅ | `POST /api/devices/{deviceId}/reports` | 장치 1분 집계 보고 | ESP32 |
+| ✅ | `GET /api/auth/providers` | 키가 설정된 소셜 로그인 목록 | 14 |
+| ✅ | `GET /api/auth/{google\|kakao\|naver}/start`, `/callback` | 소셜 로그인 (브라우저 이동, JSON 아님) | 14 |
+| ✅ | `GET /api/me`, `DELETE /api/me` | 내 회원 정보, 탈퇴 | 로그인 직후, 13·15 |
 | 🕐 | `POST /api/admin/login` | 관리자 로그인 → 토큰 | 관리자 화면 |
 | 🕐 | `GET /api/admin/hospitals/{id}` | 관리자용 병원 상태 (센서 마지막 수신 등) | 관리자 화면 |
 | 🕐 | `PUT /api/admin/hospitals/{id}/waiting` | 접수 대기 인원 입력 | 관리자 화면 |
@@ -23,7 +26,7 @@
 | 💭 | `POST /api/help-requests` | 생활 도움 요청 (17, 시안상 "준비 중") | 17 |
 | 💭 | 문서 쉽게 보기 (16) | 사진을 서버로 보내지 않는 것이 원칙이라 서버 API 없음 | 16 |
 
-어르신용 회원가입·로그인·관심 병원 저장 API는 **만들지 않습니다** (관심 병원은 브라우저 저장, [api-conventions.md](api-conventions.md) 6장).
+회원가입·로그인은 소셜 로그인만 있습니다([social-login.md](social-login.md)). 관심 병원 저장 API는 아직 없고 브라우저에 저장합니다.
 
 ---
 
@@ -128,6 +131,27 @@
 - 받으면 최근 3분 `people_avg` 평균 × 병원 보정계수(기본 0.8)를 반올림해 그 병원의 센서 대기 인원으로 저장합니다.
 - `demo_mode`가 true면 장치는 1초마다 `/frames`를 보냅니다(예정, 지금은 항상 false).
 - 등록되지 않은 `deviceId`면 `404`.
+
+---
+
+## ✅ 소셜 로그인
+
+흐름과 키 설정은 [social-login.md](social-login.md).
+
+### GET /api/auth/providers
+응답 `200`: `["kakao", "naver", "google"]` — 서버에 `client-id`가 있는 것만.
+
+### GET /api/auth/{provider}/start → 각 회사 로그인 화면으로 302
+### GET /api/auth/{provider}/callback → 프론트 `/login/callback#token=<회원 토큰>` 또는 `#error=cancelled|state|failed`로 302
+
+### GET /api/me
+헤더 `Authorization: Bearer <회원 토큰>` (없거나 틀리거나 탈퇴했으면 `401`)
+```json
+{ "id": 12, "nickname": "어르신", "provider": "KAKAO", "createdAt": "2026-11-25T07:00:00Z" }
+```
+
+### DELETE /api/me
+탈퇴. `204`. 회원 줄은 남기고 `deleted_at`만 채웁니다(운영자 화면 집계에서 빠짐). 같은 계정으로 다시 로그인하면 새로 가입한 것으로 봅니다.
 
 ---
 

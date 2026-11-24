@@ -5,6 +5,7 @@
 | [api-conventions.md](api-conventions.md) | API 공통 규약 (주소, JSON, 날짜, 오류 형식, 인증, 버전) | 모두. 새 API를 만들기 전에 먼저 |
 | [api-spec.md](api-spec.md) | API 하나하나의 요청·응답 (구현됨 / 예정) | BE, FE, 장치 담당 |
 | [fe-integration.md](fe-integration.md) | 프론트가 화면별로 어떤 API를 어떻게 부르는지 | FE |
+| [social-login.md](social-login.md) | 구글·카카오·네이버 로그인 흐름, Render 환경변수, 키 발급 방법 | BE, 팀 (키 발급 담당) |
 | [backend-roadmap.md](backend-roadmap.md) | 백엔드 고도화 계획 (노원구 공공데이터, 필터, 진료시간, 관리자, 시연 SSE) | BE, 팀 |
 
 - 실행 중인 서버의 자동 문서: `/swagger-ui/index.html` (로컬: http://localhost:8080/swagger-ui/index.html)
